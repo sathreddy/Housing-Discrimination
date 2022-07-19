@@ -58,102 +58,102 @@ def update_row(idx, destination, debug_mode):
         #update_crime(idx, is_off_market)
         #update_school(idx, is_off_market)
         #update_shop_eat(idx, is_off_market)
-	update_ejscreen(idx, debug_mode)
-        rentals.to_csv(destination, index=False)
+    update_ejscreen(idx, debug_mode)
+    rentals.to_csv(destination, index=False)
     finish_listing(driver, idx)
 
 def update_basic_info(idx, off_market):
-	print("Updating basic info")
-	d = {}
-	info.extract_basic_info(driver, d, off_market)
-	update_rental_file(idx, d)
-        return 1
+    print("Updating basic info")
+    d = {}
+    info.extract_basic_info(driver, d, off_market)
+    update_rental_file(idx, d)
+    return 1
 
 def update_crime(idx, off_market):
-	print("Updating Crime Data")
-	d = {}
-	crime.extract_crime(driver, d, off_market)
-	update_rental_file(idx, d)
-	return 0
+    print("Updating Crime Data")
+    d = {}
+    crime.extract_crime(driver, d, off_market)
+    update_rental_file(idx, d)
+    return 0
             
 def update_school(idx, off_market):
-	print("Updating School Data")
-	d = {}
-	school.extract_school(driver, d, off_market)
-	update_rental_file(idx, d)
-	return 0
+    print("Updating School Data")
+    d = {}
+    school.extract_school(driver, d, off_market)
+    update_rental_file(idx, d)
+    return 0
 
 def update_ejscreen(idx, debug_mode):
-	print("Crawling ejscreen")
-	d = {}
-	driver.execute_script("window.open('https://ejscreen.epa.gov/mapper/mobile/', 'new_tab')")
-	sleep(5)
-	driver.switch_to_window(driver.window_handles[1])
-	address = get_address(idx)
-	try:
-        	handle_ejscreen_input(driver, address)
-        	sleep(3)
-        	extract_pollution_from_report(driver, d)
-	except:
-		if debug_mode:
-			driver.quit()
-			for proc in psutil.process_iter():
-				if proc.name() == "firefox" or proc.name() == "geckodriver":
-					proc.kill()
-			raise
-		else:
-			print("Cannot extract pollution. Restarting")
-			driver.quit()
-			restart("logfile", debug_mode, idx)
+    print("Crawling ejscreen")
+    d = {}
+    driver.execute_script("window.open('https://ejscreen.epa.gov/mapper/mobile/', 'new_tab')")
+    sleep(5)
+    driver.switch_to_window(driver.window_handles[1])
+    address = get_address(idx)
+    try:
+            handle_ejscreen_input(driver, address)
+            sleep(3)
+            extract_pollution_from_report(driver, d)
+    except:
+        if debug_mode:
+            driver.quit()
+            for proc in psutil.process_iter():
+                if proc.name() == "firefox" or proc.name() == "geckodriver":
+                    proc.kill()
+            raise
+        else:
+            print("Cannot extract pollution. Restarting")
+            driver.quit()
+            restart("logfile", debug_mode, idx)
 
-	write_ejscreen_to_file(idx, d)
+    write_ejscreen_to_file(idx, d)
 
 def get_address(idx):
-	if rentals.at[idx, "Address"] == "NA":
-		return "NA"
-	return rentals.at[idx, "Address"] + ", " + rentals.at[idx, "City"] + ", " + rentals.at[idx, "State"] + ", " + str(rentals.at[idx, "Zip_Code"])
+    if rentals.at[idx, "Address"] == "NA":
+        return "NA"
+    return rentals.at[idx, "Address"] + ", " + rentals.at[idx, "City"] + ", " + rentals.at[idx, "State"] + ", " + str(rentals.at[idx, "Zip_Code"])
 
 def write_ejscreen_to_file(idx, d):
-	rentals.at[idx, "Latitude"] = 0 #"lat"
-	rentals.at[idx, "Longitude"] = 0 #"lon"
-	rentals.at[idx, "EPA_Region"] = d.get("epa_region", "NA")
-	rentals.at[idx, "Population"] = d.get("population", "NA")
-	rentals.at[idx, "Input_area(sq. miles)"] = d.get("input area(sq. miles)", "NA")
-	rentals.at[idx, "Short_form_ID"] = d.get("short_form_id", 0)
+    rentals.at[idx, "Latitude"] = 0 #"lat"
+    rentals.at[idx, "Longitude"] = 0 #"lon"
+    rentals.at[idx, "EPA_Region"] = d.get("epa_region", "NA")
+    rentals.at[idx, "Population"] = d.get("population", "NA")
+    rentals.at[idx, "Input_area(sq. miles)"] = d.get("input area(sq. miles)", "NA")
+    rentals.at[idx, "Short_form_ID"] = d.get("short_form_id", 0)
 
-	columns = ["Particulate_Matter", "Ozone", "NATA*_Diesel_PM", "NATA*_Air_Toxics_Cancer_Risk", "NATA*_Respiratory_Hazard_Index", "Traffic_Proximity_and_Volume",
+    columns = ["Particulate_Matter", "Ozone", "NATA*_Diesel_PM", "NATA*_Air_Toxics_Cancer_Risk", "NATA*_Respiratory_Hazard_Index", "Traffic_Proximity_and_Volume",
         "Lead_Paint_Indicator", "Superfund_Proximity", "RMP_Proximity", "Hazardous_Waste_Proximity", "Wastewater_Discharge_Indicator", "Demographic_Index%",
         "Minority_Population%", "Low_Income_Population%", "Linguistically_Isolated_Population%", "Population_with_Less_Than_High_School_Education%", 
-	"Population_under_Age_5%", "Population_over_Age_64%"]
+    "Population_under_Age_5%", "Population_over_Age_64%"]
 
-	for col in columns:
-		key = replace_spaces(col)
-		rentals.at[idx, col] = d.get(key, "NA")
+    for col in columns:
+        key = replace_spaces(col)
+        rentals.at[idx, col] = d.get(key, "NA")
 
 
 def replace_spaces(rentals_column):
-	if rentals_column[-1] == "%":
-		rentals_column = rentals_column[0:-1]
-	return rentals_column.replace("_", " ")
-	
+    if rentals_column[-1] == "%":
+        rentals_column = rentals_column[0:-1]
+    return rentals_column.replace("_", " ")
+    
 
 def school_check(idx):
-	fields = ["Elementary_School_Count", "Middle_School_Count", "High_School_Count"]
-	for f in fields:
-		if rentals[f][idx] == -1:
-			return False
-	return True
+    fields = ["Elementary_School_Count", "Middle_School_Count", "High_School_Count"]
+    for f in fields:
+        if rentals[f][idx] == -1:
+            return False
+    return True
 
 def update_shop_eat(idx, off_market):
-	print("Updating Shop & Eat")
-	d = {}	
-	shop.extract_shop(driver, d, off_market)
-	update_rental_file(idx, d)  
-	return 0
+    print("Updating Shop & Eat")
+    d = {}	
+    shop.extract_shop(driver, d, off_market)
+    update_rental_file(idx, d)  
+    return 0
 
 def update_rental_file(idx, d):
-	for key in d.keys():
-		rentals.at[idx, key] = d[key]
+    for key in d.keys():
+        rentals.at[idx, key] = d[key]
 
 def open_page(url):
     driver.delete_all_cookies()

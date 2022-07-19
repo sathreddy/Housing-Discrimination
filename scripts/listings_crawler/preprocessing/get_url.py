@@ -97,124 +97,124 @@ trulia = "https://www.trulia.com"
 # 	os.execv(sys.executable, ['python'] + arg)
 
 def query(driver, pro_type, address):
-	driver.get("https://www.trulia.com/")
+    driver.get("https://www.trulia.com/")
 
-	# Address bar
-	city_input_cond = EC.presence_of_element_located((By.XPATH, "//*[@id='homepageSearchBoxTextInput']"))
-	city_input_handle = WebDriverWait(driver, 10).until(city_input_cond)
+    # Address bar
+    city_input_cond = EC.presence_of_element_located((By.XPATH, "//*[@id='homepageSearchBoxTextInput']"))
+    city_input_handle = WebDriverWait(driver, 10).until(city_input_cond)
 
-	if pro_type == "buy":
-		driver.find_element_by_xpath("//*[@id='homepageApp']/div/div[1]/div/div/div[1]/div/button[1]").click()
-	elif pro_type == "rent":
-		driver.find_element_by_xpath("//*[@id='homepageApp']/div/div[1]/div/div/div[1]/div/button[2]").click()
-	elif pro_type == "sold":
-		driver.find_element_by_xpath("//*[@id='homepageApp']/div/div[1]/div/div/div[1]/div/button[3]").click()
+    if pro_type == "buy":
+        driver.find_element_by_xpath("//*[@id='homepageApp']/div/div[1]/div/div/div[1]/div/button[1]").click()
+    elif pro_type == "rent":
+        driver.find_element_by_xpath("//*[@id='homepageApp']/div/div[1]/div/div/div[1]/div/button[2]").click()
+    elif pro_type == "sold":
+        driver.find_element_by_xpath("//*[@id='homepageApp']/div/div[1]/div/div/div[1]/div/button[3]").click()
 
-	sleep(3)
+    sleep(3)
 
-	city_input_handle.send_keys(address)
+    city_input_handle.send_keys(address)
 
-	# Search button
-	driver.find_element_by_xpath("//*[@id='homepageApp']/div/div[1]/div/div/div[2]/div/div/div[1]/button[1]").click()
+    # Search button
+    driver.find_element_by_xpath("//*[@id='homepageApp']/div/div[1]/div/div/div[2]/div/div/div[1]/button[1]").click()
 
-	sleep(5)
+    sleep(5)
 
-	print(driver.current_url)
+    print(driver.current_url)
 
-	return driver.current_url
+    return driver.current_url
 
 def main(input_file, output_file, start, end, crawler_log, geckodriver_path, debug_mode, adblock_path, uBlock_path):
-	urls = []
+    urls = []
 
-	df = pd.read_csv(input_file)
+    df = pd.read_csv(input_file)
 
-	driver = start_firefox(trulia, geckodriver_path, adblock_path, uBlock_path)
-	sleep(5)
+    driver = start_firefox(trulia, geckodriver_path, adblock_path, uBlock_path)
+    sleep(5)
 
-	try:
-		driver.switch_to_window(driver.window_handles[1])
-		driver.close()
-		driver.switch_to_window(driver.window_handles[0])
-	except:
-		print ("switching window failed??")
-		driver.quit()
-		restart(crawler_log, debug_mode, start)
+    try:
+        driver.switch_to_window(driver.window_handles[1])
+        driver.close()
+        driver.switch_to_window(driver.window_handles[0])
+    except:
+        print ("switching window failed??")
+        driver.quit()
+        restart(crawler_log, debug_mode, start)
 
-	i = int(start)
-	count = 0
-	for address in df["full"][int(start):int(end)]:
-		if count == 60:
-			os.system("sudo tmpreaper -m 1h /tmp")
-			restart()
-		try:
-			print(i, address)
+    i = int(start)
+    count = 0
+    for address in df["full"][int(start):int(end)]:
+        if count == 60:
+            os.system("sudo tmpreaper -m 1h /tmp")
+            restart()
+        try:
+            print(i, address)
 
-			# url1 = query(driver, "buy", address)
-			url1 = ""
-			url2 = query(driver, "rent", address)
-			url3 = ""
-			# url3 = query(driver, "sold", address)
+            # url1 = query(driver, "buy", address)
+            url1 = ""
+            url2 = query(driver, "rent", address)
+            url3 = ""
+            # url3 = query(driver, "sold", address)
 
-			urls.append([url1, url2, url3])
+            urls.append([url1, url2, url3])
 
-			with open(output_file, "ab") as log:
-		  		filewriter = csv.writer(log, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
-		  		filewriter.writerow([url1, url2, url3])
-			with open(crawler_log, "ab") as log:
-		  		filewriter = csv.writer(log, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
-		  		filewriter.writerow([i])
+            with open(output_file, "ab") as log:
+                  filewriter = csv.writer(log, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
+                  filewriter.writerow([url1, url2, url3])
+            with open(crawler_log, "ab") as log:
+                  filewriter = csv.writer(log, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
+                  filewriter.writerow([i])
 
-			i += 1
-			count += 1
-			
-		except:
-			if debug_mode:
-				driver.quit()
-				for proc in psutil.process_iter():
-					if proc.name() == "firefox" or proc.name() == "geckodriver":
-						proc.kill()
-				raise
-			else:
-				driver.quit()
-				restart(crawler_log, debug_mode, start)
-	driver.quit()
+            i += 1
+            count += 1
+            
+        except:
+            if debug_mode:
+                driver.quit()
+                for proc in psutil.process_iter():
+                    if proc.name() == "firefox" or proc.name() == "geckodriver":
+                        proc.kill()
+                raise
+            else:
+                driver.quit()
+                restart(crawler_log, debug_mode, start)
+    driver.quit()
 
 if __name__ == "__main__":
-	import argparse
-	import platform
-	from argparse import RawTextHelpFormatter
+    import argparse
+    import platform
+    from argparse import RawTextHelpFormatter
 
-	parser = argparse.ArgumentParser(description = 'Crawl Trulia URLs given addresses', formatter_class = RawTextHelpFormatter)
-	parser.add_argument("input_file", help = "Path of input file")
-	parser.add_argument("output_file", help = "Path of output file")
-	parser.add_argument("start", help = "Start of Input file", type = int)
-	parser.add_argument("end", help = "End of Input file", type = int)
-	parser.add_argument("log", help = "Name of the log")
-	parser.add_argument("--debug", help = "Turn on debug mode or not. Default False", type = bool, default = False)
-	parser.add_argument("--geckodriver", help = "Path of geckodriver.\nDefault ../../stores/", default = "../../stores/")
-	parser.add_argument("--adblock", help = "Path of adblock.xpi (need ABSOLUTE PATH!!).\nDefault /home/ubuntu/Housing-Discrimination/stores/", default = "/home/ubuntu/Housing-Discrimination/stores/")
-	parser.add_argument("--uBlock", help = "Path of uBlock0.xpi (need ABSOLUTE PATH!!).\nDefault /home/ubuntu/Housing-Discrimination/stores/", default = "/home/ubuntu/Housing-Discrimination/stores/")
+    parser = argparse.ArgumentParser(description = 'Crawl Trulia URLs given addresses', formatter_class = RawTextHelpFormatter)
+    parser.add_argument("input_file", help = "Path of input file")
+    parser.add_argument("output_file", help = "Path of output file")
+    parser.add_argument("start", help = "Start of Input file", type = int)
+    parser.add_argument("end", help = "End of Input file", type = int)
+    parser.add_argument("log", help = "Name of the log")
+    parser.add_argument("--debug", help = "Turn on debug mode or not. Default False", type = bool, default = False)
+    parser.add_argument("--geckodriver", help = "Path of geckodriver.\nDefault ../../stores/", default = "../../stores/")
+    parser.add_argument("--adblock", help = "Path of adblock.xpi (need ABSOLUTE PATH!!).\nDefault /home/ubuntu/Housing-Discrimination/stores/", default = "/home/ubuntu/Housing-Discrimination/stores/")
+    parser.add_argument("--uBlock", help = "Path of uBlock0.xpi (need ABSOLUTE PATH!!).\nDefault /home/ubuntu/Housing-Discrimination/stores/", default = "/home/ubuntu/Housing-Discrimination/stores/")
 
-	args = parser.parse_args()
+    args = parser.parse_args()
 
-	if args.debug:
-		print(args)
+    if args.debug:
+        print(args)
 
-	geckodriver_path = args.geckodriver + "geckodriver" + (".exe" if "Windows" in platform.system() else "")
-	if not os.path.exists(geckodriver_path):
-		sys.exit("geckodriver does not exist in path. Aborting.")
+    geckodriver_path = args.geckodriver + "geckodriver" + (".exe" if "Windows" in platform.system() else "")
+    if not os.path.exists(geckodriver_path):
+        sys.exit("geckodriver does not exist in path. Aborting.")
 
-	adblock_path = args.adblock + "adblock_plus-3.3.1-an+fx.xpi"
-	if not os.path.exists(adblock_path):
-		sys.exit("adblock_plus does not exist in path. Aborting.")
+    adblock_path = args.adblock + "adblock_plus-3.3.1-an+fx.xpi"
+    if not os.path.exists(adblock_path):
+        sys.exit("adblock_plus does not exist in path. Aborting.")
 
-	uBlock_path = args.uBlock + "uBlock0@raymondhill.net.xpi"
-	if not os.path.exists(uBlock_path):
-		sys.exit("uBlock does not exist in path. Aborting.")
-	try:
-		main(args.input_file, args.output_file, args.start, args.end, args.log, geckodriver_path, args.debug, adblock_path, uBlock_path)
-	except:
-		for proc in psutil.process_iter():
-			if proc.name() == "firefox" or proc.name() == "geckodriver":
-				proc.kill()
-		raise
+    uBlock_path = args.uBlock + "uBlock0@raymondhill.net.xpi"
+    if not os.path.exists(uBlock_path):
+        sys.exit("uBlock does not exist in path. Aborting.")
+    try:
+        main(args.input_file, args.output_file, args.start, args.end, args.log, geckodriver_path, args.debug, adblock_path, uBlock_path)
+    except:
+        for proc in psutil.process_iter():
+            if proc.name() == "firefox" or proc.name() == "geckodriver":
+                proc.kill()
+        raise
