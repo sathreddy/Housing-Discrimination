@@ -34,9 +34,9 @@ from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.proxy import Proxy
 
-from sold_rental.extract_sold_rental_data import *
-from rental.extract_rental_data import *
-import crime, school, shop, basic_info as basic
+from extract.sold_rental.extract_sold_rental_data import *
+from extract.rental.extract_rental_data import *
+import crime, extract.school, shop, extract.basic_info as basic
 
 def check_off_market(driver):
     """Check wheather if the listing is off market (or new/old type of layout, if you prefer)

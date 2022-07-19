@@ -10,8 +10,8 @@ import random
 import json
 import pandas as pd
 import numpy as np
-sys.path.insert(1, '/home/ubuntu/Housing-Discrimination/scripts/listings_crawler/extract/sold_rental')
-import extract_sold_rental_data as extract
+# sys.path.insert(1, '/home/ubuntu/Housing-Discrimination/scripts/listings_crawler/extract/sold_rental')
+import extract.sold_rental.extract_sold_rental_data as extract
 from sys import exit
 from time import sleep
 from re import sub

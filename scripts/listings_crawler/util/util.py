@@ -99,11 +99,11 @@ def start_firefox(URL, geckodriver_path, adblock_path, uBlock_path):
     fp = webdriver.FirefoxProfile()
     fp.set_preference("general.useragent.override", UserAgent().random)
     fp.update_preferences()
-    driver = webdriver.Firefox(firefox_profile = fp, firefox_options = options, capabilities = webdriver.DesiredCapabilities.FIREFOX, executable_path = geckodriver_path)
+    driver = webdriver.Firefox(firefox_profile = fp, options = options, capabilities = webdriver.DesiredCapabilities.FIREFOX, executable_path = geckodriver_path)
     #driver = webdriver.Remote(desired_capabilities = webdriver.DesiredCapabilities.FIREFOX)
 
-    driver.install_addon(adblock_path)
-    driver.install_addon(uBlock_path)
+    # driver.install_addon(adblock_path)
+    # driver.install_addon(uBlock_path)
     #driver.install_addon("I:\\adblock_plus-3.0.2-an+fx.xpi")
     #driver.install_addon("I:\\uBlock0@raymondhill.net.xpi")
 

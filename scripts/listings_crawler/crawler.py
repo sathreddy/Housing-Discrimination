@@ -259,19 +259,19 @@ if __name__ == "__main__":
         print(args)
 
     #geckodriver_path = args.geckodriver + "geckodriver" + (".exe" if "Windows" in platform.system() else "")
-    geckodriver_path = '/usr/bin/geckodriver'
+    geckodriver_path = '/usr/local/bin/geckodriver'
     if not os.path.exists(geckodriver_path):
         sys.exit("geckodriver does not exist at {}\nAborting.".format(geckodriver_path))
 
     #adblock_path = args.adblock + "adblock_plus-3.3.1-an+fx.xpi"
     adblock_path = "/home/ubuntu/trulia/stores/adblock_plus-3.3.1-an+fx.xpi"
-    if not os.path.exists(adblock_path):
-        sys.exit("adblock_plus does not exist at {}\nAborting.".format(adblock_path))
+    # if not os.path.exists(adblock_path):
+    #     sys.exit("adblock_plus does not exist at {}\nAborting.".format(adblock_path))
 
     #uBlock_path = args.uBlock + "uBlock0@raymondhill.net.xpi"
     uBlock_path = "/home/ubuntu/trulia/stores/uBlock0@raymondhill.net.xpi"
-    if not os.path.exists(uBlock_path):
-        sys.exit("uBlock does not exist at {}\nAborting.".format(uBlock_path))
+    # if not os.path.exists(uBlock_path):
+    #     sys.exit("uBlock does not exist at {}\nAborting.".format(uBlock_path))
 
     try:
         main(crawl_type, args.input_file, args.output_file, args.start, args.end, args.log, geckodriver_path, args.repair, args.debug, adblock_path, uBlock_path)
