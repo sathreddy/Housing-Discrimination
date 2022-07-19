@@ -24,38 +24,38 @@ from datetime import date, timedelta, datetime
 import pytz
 
 def wait_and_get(browser, cond, maxtime): 
-	flag = True
+    flag = True
 
-	while flag:
-		try: 
-			ret = WebDriverWait(browser, maxtime).until(cond)
-			sleep(2)
-			ret = WebDriverWait(browser, maxtime).until(cond)
-			flag = False
-			return ret
-		except TimeoutException:
-			#print("Time out")
-			flag = False
-			while len(browser.window_handles) > 1:
-				browser.switch_to_window(browser.window_handles[-1])
-				browser.close()
-				browser.switch_to_window(browser.window_handles[0])
-				flag = True
-			if not flag:
-				try:
-					browser.find_elements_by_id("searchID").click()
-					flag = True
-				except:
-					#print("Time out without pop-ups. Exit.")
-					return 0
+    while flag:
+        try: 
+            ret = WebDriverWait(browser, maxtime).until(cond)
+            sleep(2)
+            ret = WebDriverWait(browser, maxtime).until(cond)
+            flag = False
+            return ret
+        except TimeoutException:
+            #print("Time out")
+            flag = False
+            while len(browser.window_handles) > 1:
+                browser.switch_to_window(browser.window_handles[-1])
+                browser.close()
+                browser.switch_to_window(browser.window_handles[0])
+                flag = True
+            if not flag:
+                try:
+                    browser.find_elements_by_id("searchID").click()
+                    flag = True
+                except:
+                    #print("Time out without pop-ups. Exit.")
+                    return 0
 
-		except ElementNotVisibleException:
-			print("Element Not Visible, presumptuously experienced pop-ups")
-			while len(browser.window_handles) > 1:
-				browser.switch_to_window(browser.window_handles[-1])
-				browser.close()
-				browser.switch_to_window(browser.window_handles[0])
-				flag = True
+        except ElementNotVisibleException:
+            print("Element Not Visible, presumptuously experienced pop-ups")
+            while len(browser.window_handles) > 1:
+                browser.switch_to_window(browser.window_handles[-1])
+                browser.close()
+                browser.switch_to_window(browser.window_handles[0])
+                flag = True
 
 root = '/home/ubuntu/Housing-Discrimination/'
 
@@ -66,11 +66,11 @@ ZIP_URL_PAGE = '_p'
 
 # read in zip code csv file 
 if len(sys.argv) != 1: 
-	print('-------------------------------------------------')
-	print('REQUIRED ARGUMENTS:')
-	print('python new_url_crawler.py')
-	print('-------------------------------------------------')
-	exit()
+    print('-------------------------------------------------')
+    print('REQUIRED ARGUMENTS:')
+    print('python new_url_crawler.py')
+    print('-------------------------------------------------')
+    exit()
 
 tz = pytz.timezone('America/Chicago') 
 now = datetime.now(tz)
@@ -103,50 +103,50 @@ display.start() # start the display
 
 listings_all = []
 with open(dest, "w") as f:
-	writer = csv.writer(f)
-	writer.writerow(["URL"])
-	for i in range(0,len(zip_list)):
-		if zip_start != 0: 
-			zip_url = ZIP_URL_PRE + str(zip_list[i]) + ZIP_URL_SUF + '/' + str(zip_start) + ZIP_URL_PAGE 
-			counter = zip_start
-		else: 
-			zip_url = ZIP_URL_PRE + str(zip_list[i]) + ZIP_URL_SUF 
-			counter      = 0
-		driver.get(zip_url)
-		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-		num_listings = list(set(re.findall(r'\w*[0-9]* rentals? available on Trulia',driver.page_source)))
-		#print('Page Number: ' + str(counter))
-		num_pages    = 0
-		if num_listings:
-			num_pages    = math.ceil(float((num_listings[0].split(' ')[0]))/30)
+    writer = csv.writer(f)
+    writer.writerow(["URL"])
+    for i in range(0,len(zip_list)):
+        if zip_start != 0: 
+            zip_url = ZIP_URL_PRE + str(zip_list[i]) + ZIP_URL_SUF + '/' + str(zip_start) + ZIP_URL_PAGE 
+            counter = zip_start
+        else: 
+            zip_url = ZIP_URL_PRE + str(zip_list[i]) + ZIP_URL_SUF 
+            counter      = 0
+        driver.get(zip_url)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        num_listings = list(set(re.findall(r'\w*[0-9]* rentals? available on Trulia',driver.page_source)))
+        #print('Page Number: ' + str(counter))
+        num_pages    = 0
+        if num_listings:
+            num_pages    = math.ceil(float((num_listings[0].split(' ')[0]))/30)
 
-		print('=======================================================================================')
-		print('Index ' + str(i) + ' - Scraping ' + str(zip_list[i]) + ' with ' + str(num_pages) + ' pages')
-		while counter < num_pages: 
-			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			listings_on_page = []
+        print('=======================================================================================')
+        print('Index ' + str(i) + ' - Scraping ' + str(zip_list[i]) + ' with ' + str(num_pages) + ' pages')
+        while counter < num_pages: 
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            listings_on_page = []
 
-			next_cond   = EC.presence_of_element_located((By.CSS_SELECTOR,'#resultsColumn > div > div.resultsColumn > div.backgroundControls > div.backgroundBasic > div.paginationContainer.pls.mtl.ptl.mbm > div:nth-child(1) > a > i'))
-			next_handle = wait_and_get(driver, next_cond, 15)
+            next_cond   = EC.presence_of_element_located((By.CSS_SELECTOR,'#resultsColumn > div > div.resultsColumn > div.backgroundControls > div.backgroundBasic > div.paginationContainer.pls.mtl.ptl.mbm > div:nth-child(1) > a > i'))
+            next_handle = wait_and_get(driver, next_cond, 15)
 
-			listings_on_page = list(set(re.findall(r'\w*href="\W[a-z]\W[a-z][a-z][\w|\W]*?"',driver.page_source)))
+            listings_on_page = list(set(re.findall(r'\w*href="\W[a-z]\W[a-z][a-z][\w|\W]*?"',driver.page_source)))
 
-			listings_on_page = [listing.replace('href="','https://www.trulia.com').replace('"','') for listing in listings_on_page]
+            listings_on_page = [listing.replace('href="','https://www.trulia.com').replace('"','') for listing in listings_on_page]
 
-			listings_on_page = [page for page in listings_on_page if page not in listings_all]
-			listings_all = (listings_all) + listings_on_page
-			listings_on_page = [[page] for page in listings_on_page]
-			writer.writerows(listings_on_page)
-			#print(listings_on_page)
-                        if len(listings_on_page) != 0:
-                            print('Page {}: Number of listings: {}'.format(counter + 1, len(listings_on_page)))
-			    print('\tTotal length of listings: {}'.format(len(listings_all)))
-                        else:
-                            print("No listings on page {}".format(str(counter)))
-			counter += 1
-			if counter < num_pages:
-				driver.get(zip_url+str(counter) + '_p')
-				sleep(5)
+            listings_on_page = [page for page in listings_on_page if page not in listings_all]
+            listings_all = (listings_all) + listings_on_page
+            listings_on_page = [[page] for page in listings_on_page]
+            writer.writerows(listings_on_page)
+            #print(listings_on_page)
+            if len(listings_on_page) != 0:
+                print('Page {}: Number of listings: {}'.format(counter + 1, len(listings_on_page)))
+                print('\tTotal length of listings: {}'.format(len(listings_all)))
+            else:
+                print("No listings on page {}".format(str(counter)))
+            counter += 1
+            if counter < num_pages:
+                driver.get(zip_url+str(counter) + '_p')
+                sleep(5)
 
 driver.quit()
 display.stop()

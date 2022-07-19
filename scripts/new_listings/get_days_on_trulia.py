@@ -61,30 +61,30 @@ def update_row(idx, destination):
     finish_listing(driver, idx)
 
 def get_new_info(idx, off_market):
-	print("Collecting Basic Info")
-	d = {}
-	info.extract_basic_info(driver, d, off_market)
-	is_new(d)
-	rentals.at[idx, 'Days_On_Trulia'] = d.get('Days_On_Trulia', "NA")
-	rentals.at[idx, 'Is_New'] = d['Is_New']
-        return 1
+    print("Collecting Basic Info")
+    d = {}
+    info.extract_basic_info(driver, d, off_market)
+    is_new(d)
+    rentals.at[idx, 'Days_On_Trulia'] = d.get('Days_On_Trulia', "NA")
+    rentals.at[idx, 'Is_New'] = d['Is_New']
+    return 1
 
 def is_new(d):
-	try:
-		new = driver.find_element_by_xpath('//*[@id="main-content"]/div[2]/div[1]/div/div/div[3]/div[1]/span[2]/span').text
-		if new.lower() == 'new':
-			d['Is_New'] = 1
-		else:
-			d['Is_New'] = 0
-	except:
-		d['Is_New'] = 0
+    try:
+        new = driver.find_element_by_xpath('//*[@id="main-content"]/div[2]/div[1]/div/div/div[3]/div[1]/span[2]/span').text
+        if new.lower() == 'new':
+            d['Is_New'] = 1
+        else:
+            d['Is_New'] = 0
+    except:
+        d['Is_New'] = 0
 
 def update_rental_file(idx, d):
-	for key in d.keys():
-		#if isinstance(d[key], basestring):
-		rentals.at[idx, key] = d[key]
-		#else:
-		#	rentals.at[idx, key] = d[key]
+    for key in d.keys():
+        #if isinstance(d[key], basestring):
+        rentals.at[idx, key] = d[key]
+        #else:
+        #	rentals.at[idx, key] = d[key]
 
 def open_page(url):
     driver.delete_all_cookies()
